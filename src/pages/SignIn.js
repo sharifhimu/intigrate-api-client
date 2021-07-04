@@ -1,9 +1,49 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 
 import Header from '../partials/Header';
+import { MAIN_URL } from '../api'
 
 function SignIn() {
+
+  const [info, setInfo] = useState({ name: '' , password: '' })
+  const [data, setData] = useState({})
+
+  let history = useHistory();
+
+  const onSubmit = async(e) => {
+    e.preventDefault()
+    // console.log(info);
+
+
+    try{
+      let res = await fetch(MAIN_URL + `/all/${info.name}`, 
+      {
+        method: 'GET',
+        headers: { "Content-Type": "application/json" },
+        // body: JSON.stringify( {fullname: name, email: email, dob: dob, profession: profession, password: password })
+      }).then((response) => response.json())
+        .then( data => setData(data)  )
+      
+      if(data){
+        if(data.password == info.password  && data.fullname == info.name ){
+          localStorage.setItem('logged', 'true')
+          history.push('/')
+        }else{
+          alert('Your name or password is incorrect')
+        }
+      } else{
+        alert('Your name or password is incorrect')
+      }
+
+      
+    }catch(err){
+      console.log(err);
+      alert('Your name or password is incorrect')
+    }
+
+  }
+
   return (
     <div className="flex flex-col min-h-screen overflow-hidden">
 
@@ -24,11 +64,11 @@ function SignIn() {
 
               {/* Form */}
               <div className="max-w-sm mx-auto">
-                <form>
+                <form onSubmit={onSubmit} >
                   <div className="flex flex-wrap -mx-3 mb-4">
                     <div className="w-full px-3">
-                      <label className="block text-gray-800 text-sm font-medium mb-1" htmlFor="email">Email</label>
-                      <input id="email" type="email" className="form-input w-full text-gray-800" placeholder="Enter your email address" required />
+                      <label className="block text-gray-800 text-sm font-medium mb-1" htmlFor="name" >Name</label>
+                      <input onChange={ (e) => setInfo({...info, name: e.target.value}) } id="name" type="name" className="form-input w-full text-gray-800" placeholder="Enter your name" required />
                     </div>
                   </div>
                   <div className="flex flex-wrap -mx-3 mb-4">
@@ -37,7 +77,7 @@ function SignIn() {
                         <label className="block text-gray-800 text-sm font-medium mb-1" htmlFor="password">Password</label>
                         <Link to="reset-password" className="text-sm font-medium text-blue-600 hover:underline">Having trouble signing in?</Link>
                       </div>
-                      <input id="password" type="password" className="form-input w-full text-gray-800" placeholder="Enter your password" required />
+                      <input onChange={ (e) => setInfo({...info, password: e.target.value}) }  id="password" type="password" className="form-input w-full text-gray-800" placeholder="Enter your password" required />
                     </div>
                   </div>
                   <div className="flex flex-wrap -mx-3 mb-4">
@@ -56,7 +96,7 @@ function SignIn() {
                     </div>
                   </div>
                 </form>
-                <div className="flex items-center my-6">
+                {/* <div className="flex items-center my-6">
                   <div className="border-t border-gray-300 flex-grow mr-3" aria-hidden="true"></div>
                   <div className="text-gray-600 italic">Or</div>
                   <div className="border-t border-gray-300 flex-grow ml-3" aria-hidden="true"></div>
@@ -85,7 +125,7 @@ function SignIn() {
                 </form>
                 <div className="text-gray-600 text-center mt-6">
                   Don’t you have an account? <Link to="/signup" className="text-blue-600 hover:underline transition duration-150 ease-in-out">Sign up</Link>
-                </div>
+                </div> */}
               </div>
 
             </div>
