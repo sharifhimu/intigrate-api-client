@@ -1,11 +1,106 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
 
 import Header from '../partials/Header';
+import { MAIN_URL } from '../api'
 
 function SignUp() {
+
+  let history = useHistory();
+
+  const [name, setName ] = useState()
+  const [email, setEmail ] = useState()
+  const [dob, setDob ] = useState()
+  const [profession, setProfession ] = useState()
+  const [password, setPassword ] = useState()
+
+  const [open, setOpen] = useState(false)
+
+  console.log(name, email, dob, profession, password );
+
+
+  const onSubmit = async (e) => {
+    e.preventDefault()
+    try{
+      let res = await fetch(MAIN_URL + '/register', 
+      {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify( {fullname: name, email: email, dob: dob, profession: profession, password: password })
+      })
+      console.log('res',res);
+      history.push('/signin')
+    }catch(err){
+      console.log(err);
+    }
+  }
+
+  const onGit = async(e) => {
+    // e.preventDefault();
+    setOpen(true)
+  }
+
+  // const test = async() => {
+  //   try{
+  //     let res = await fetch(`https://api.github.com/user/sharifsorotcu@gmail.com`, 
+  //     {
+  //       method: 'GET',
+  //       headers: { "Content-Type": "application/json" },
+  //       // body: JSON.stringify( {fullname: name, email: email, dob: dob, profession: profession, password: password })
+  //     })
+  //     console.log('res',res);
+  //     // history.push('/signin')
+  //   }catch(err){
+  //     console.log(err);
+  //   }
+  // }
+
+  const gitsignup = async() => {
+
+    let data = {};
+    
+    try{
+      let res = await fetch( `https://api.github.com/users/${name}`, 
+      {
+        method: 'GET',
+        headers: { "Content-Type": "application/json" },
+        // body: JSON.stringify( {fullname: name, email: email, dob: dob, profession: profession, password: password })
+      }).then(res =>  res.json()  )
+      .then( response =>  data = response )
+      
+      if(data.url){
+        console.log(data);
+          try{
+            let res = await fetch(MAIN_URL + '/register', 
+            {
+              method: 'POST',
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify( {fullname: name, email: data?.email ? data?.email : data?.url , dob: null, profession: null, password: password })
+            })
+            console.log('res',res);
+            history.push('/signin')
+          }catch(err){
+            console.log(err);
+            alert('your user name is incorrect')
+          }
+      }  
+        // console.log(res);
+
+    }catch(err){
+      console.log(err);
+      alert('your github usename is incorrect')
+    }
+
+  }
+
+  const cancelbtn = () => {
+    setOpen(false)
+    setPassword('')
+  }
+
   return (
     <div className="flex flex-col min-h-screen overflow-hidden">
+
 
       {/*  Site header */}
       <Header />
@@ -24,28 +119,40 @@ function SignUp() {
 
               {/* Form */}
               <div className="max-w-sm mx-auto">
-                <form>
+                <form onSubmit={onSubmit}>
                   <div className="flex flex-wrap -mx-3 mb-4">
                     <div className="w-full px-3">
                       <label className="block text-gray-800 text-sm font-medium mb-1" htmlFor="name">Name <span className="text-red-600">*</span></label>
-                      <input id="name" type="text" className="form-input w-full text-gray-800" placeholder="Enter your name" required />
+                      <input onChange={ (e) => setName(e.target.value) } id="name" type="text" className="form-input w-full text-gray-800" placeholder="Enter your name" required />
                     </div>
                   </div>
                   <div className="flex flex-wrap -mx-3 mb-4">
                     <div className="w-full px-3">
                       <label className="block text-gray-800 text-sm font-medium mb-1" htmlFor="email">Email <span className="text-red-600">*</span></label>
-                      <input id="email" type="email" className="form-input w-full text-gray-800" placeholder="Enter your email address" required />
+                      <input onChange={ (e) => setEmail(e.target.value) } id="email" type="email" className="form-input w-full text-gray-800" placeholder="Enter your email address" required />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap -mx-3 mb-4">
+                    <div className="w-full px-3">
+                      <label className="block text-gray-800 text-sm font-medium mb-1" htmlFor="date">Date of Birth <span className="text-red-600">*</span></label>
+                      <input onChange={ (e) => setDob(e.target.value) } id="dob" type="date" className="form-input w-full text-gray-800" placeholder="Enter your date of birth" required />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap -mx-3 mb-4">
+                    <div className="w-full px-3">
+                      <label className="block text-gray-800 text-sm font-medium mb-1" htmlFor="profession">Profession <span className="text-red-600">*</span></label>
+                      <input  onChange={ (e) => setProfession(e.target.value) } id="profession" type="text" className="form-input w-full text-gray-800" placeholder="Enter your profession" required />
                     </div>
                   </div>
                   <div className="flex flex-wrap -mx-3 mb-4">
                     <div className="w-full px-3">
                       <label className="block text-gray-800 text-sm font-medium mb-1" htmlFor="password">Password <span className="text-red-600">*</span></label>
-                      <input id="password" type="password" className="form-input w-full text-gray-800" placeholder="Enter your password" required />
+                      <input  onChange={ (e) => setPassword(e.target.value) } id="password" type="password" className="form-input w-full text-gray-800" placeholder="Enter your password" required />
                     </div>
                   </div>
                   <div className="flex flex-wrap -mx-3 mt-6">
                     <div className="w-full px-3">
-                      <button className="btn text-white bg-blue-600 hover:bg-blue-700 w-full">Sign up</button>
+                      <button htmlFor="submit" type="submit" className="btn text-white bg-blue-600 hover:bg-blue-700 w-full">Sign up</button>
                     </div>
                   </div>
                   <div className="text-sm text-gray-500 text-center mt-3">
@@ -57,18 +164,19 @@ function SignUp() {
                   <div className="text-gray-600 italic">Or</div>
                   <div className="border-t border-gray-300 flex-grow ml-3" aria-hidden="true"></div>
                 </div>
-                <form>
+                {/* <form> */}
+                  {/* <button onClick={() => onGit() } > test </button> */}
                   <div className="flex flex-wrap -mx-3 mb-3">
                     <div className="w-full px-3">
-                      <button className="btn px-0 text-white bg-gray-900 hover:bg-gray-800 w-full relative flex items-center">
+                      <button  onClick={() => onGit()}  type="button" className="btn px-0 text-white bg-gray-900 hover:bg-gray-800 w-full relative flex items-center">
                         <svg className="w-4 h-4 fill-current text-white opacity-75 flex-shrink-0 mx-4" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
                           <path d="M7.95 0C3.578 0 0 3.578 0 7.95c0 3.479 2.286 6.46 5.466 7.553.397.1.497-.199.497-.397v-1.392c-2.187.497-2.683-.993-2.683-.993-.398-.895-.895-1.193-.895-1.193-.696-.497.1-.497.1-.497.795.1 1.192.795 1.192.795.696 1.292 1.888.895 2.286.696.1-.497.298-.895.497-1.093-1.79-.2-3.578-.895-3.578-3.975 0-.895.298-1.59.795-2.087-.1-.2-.397-.994.1-2.087 0 0 .695-.2 2.186.795a6.408 6.408 0 011.987-.299c.696 0 1.392.1 1.988.299 1.49-.994 2.186-.795 2.186-.795.398 1.093.199 1.888.1 2.087.496.596.795 1.291.795 2.087 0 3.08-1.889 3.677-3.677 3.875.298.398.596.895.596 1.59v2.187c0 .198.1.497.596.397C13.714 14.41 16 11.43 16 7.95 15.9 3.578 12.323 0 7.95 0z" />
                         </svg>
-                        <span className="flex-auto pl-16 pr-8 -ml-16">Continue with GitHub</span>
+                        <span   className="flex-auto pl-16 pr-8 -ml-16">Continue with GitHub</span>
                       </button>
                     </div>
                   </div>
-                  <div className="flex flex-wrap -mx-3">
+                  {/* <div className="flex flex-wrap -mx-3">
                     <div className="w-full px-3">
                       <button className="btn px-0 text-white bg-red-600 hover:bg-red-700 w-full relative flex items-center">
                         <svg className="w-4 h-4 fill-current text-white opacity-75 flex-shrink-0 mx-4" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
@@ -77,8 +185,8 @@ function SignUp() {
                         <span className="flex-auto pl-16 pr-8 -ml-16">Continue with Google</span>
                       </button>
                     </div>
-                  </div>
-                </form>
+                  </div> */}
+                {/* </form> */}
                 <div className="text-gray-600 text-center mt-6">
                   Already using Simple? <Link to="/signin" className="text-blue-600 hover:underline transition duration-150 ease-in-out">Sign in</Link>
                 </div>
@@ -89,6 +197,45 @@ function SignUp() {
         </section>
 
       </main>
+      <div style={open ? {display: 'flex'} : { display: 'none' } }>
+      <div style={{ display: 'flex' , justifyContent: 'center', position: 'fixed', width: '100%', top: '30%' }} >
+      <div style={{ width: '50%', height: '30rem', backgroundColor: 'white', boxShadow: 'rgb(0 0 0 / 50%) 0px 4px 10px -6px' }}>
+
+        <div style={{ width: '80%', margin: '10px 20px' }} >
+        <div className="flex flex-wrap -mx-3 mb-4 ">
+          <div className="w-full px-3">
+            <label className="block text-gray-800 text-sm font-medium mb-1" htmlFor="name">Your github name <span className="text-red-600">*</span></label>
+            <input onChange={ (e) => setName(e.target.value) }  id="name" type="text" className="form-input w-full text-gray-800" placeholder="Enter your name" required />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap -mx-3 mb-4">
+          <div className="w-full px-3">
+            <label className="block text-gray-800 text-sm font-medium mb-1" htmlFor="password">Password for your account <span className="text-red-600">*</span></label>
+            <input onChange={ (e) => setPassword(e.target.value) } id="password" type="password" className="form-input w-full text-gray-800" placeholder="Enter your password" required />
+          </div>
+        </div>
+
+        <div className="flex flex-wrap -mx-3 mt-6 w-1/2">
+          <div className="w-full px-3">
+            <button onClick={ () => gitsignup() } className="btn text-white bg-blue-600 hover:bg-blue-700 w-full">Sign up</button>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap -mx-3 mt-6 w-1/2">
+          <div className="w-full px-3">
+            <button onClick={ () => cancelbtn() } className="btn text-white bg-red-500 hover:bg-blue-700 w-full">cancel</button>
+          </div>
+        </div>
+
+        </div>
+
+      </div>
+      </div>
+      </div>
+
+      {/* <button onClick={() => test()} style={{ cursor: 'pointer' }} > test </button> */}
+
 
     </div>
   );
